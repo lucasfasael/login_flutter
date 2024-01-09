@@ -1,7 +1,9 @@
 # login_flutter
-Treino login flutter + spring + postgre
+Treino login
 
-spring
+Flutter
+Spring
 docker + postgre
 beheaver
 intellij
+postman
