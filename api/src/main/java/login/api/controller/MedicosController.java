@@ -1,19 +1,45 @@
 package login.api.controller;
 
 
-import login.api.medico.DadosCadastroMedico;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import jakarta.validation.Valid;
+import login.api.medico.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 
 @RestController
 @RequestMapping("medicos")
 public class MedicosController {
 
+    @Autowired
+    private MedicoRepository repository;
     @PostMapping
-    public void cadastrar(@RequestBody DadosCadastroMedico dados){
-        System.out.println(dados);
+    @Transactional
+    public void cadastrar(@RequestBody @Valid DadosCadastroMedico dados){
+        repository.save(new Medico(dados));
+    }
+    @GetMapping
+    public Page<DadosListagemMedico> listar(@PageableDefault(size = 11, sort = {"nome"}) Pageable paginacao){
+        return repository.findAllByAtivoTrue(paginacao).map(DadosListagemMedico::new);
+    }
+
+    @PutMapping
+    @Transactional
+    public void atualizar(@RequestBody @Valid DadosAtualizacaoMedico dados){
+        var medico = repository.getReferenceById(dados.id());
+        medico.atualizarInformacoes(dados);
+    }
+
+    @DeleteMapping("/{id}")
+    @Transactional
+    public void delete(@PathVariable Long id){
+        var medico = repository.getReferenceById(id);
+        medico.excluir();
     }
 }
